@@ -57,7 +57,7 @@ do
       CRYPTO_BACKEND_OPTION="--with-openssl"
     fi
 
-    ./configure --host=$HOST --prefix="$PLATFORM_OUT" --disable-debug --disable-dependency-tracking --disable-silent-rules --disable-examples-build --without-libz $CRYPTO_BACKEND_OPTION --with-libssl-prefix="$OPENSSLDIR" --disable-shared --enable-static  >> "$LOG" 2>&1
+    ./configure --host=$HOST --prefix="$PLATFORM_OUT" --enable-debug --disable-dependency-tracking --disable-silent-rules --disable-examples-build --without-libz $CRYPTO_BACKEND_OPTION --with-libssl-prefix="$OPENSSLDIR" --disable-shared --enable-static  >> "$LOG" 2>&1
 
     make >> "$LOG" 2>&1
     make -j "$BUILD_THREADS" install >> "$LOG" 2>&1
