@@ -32,7 +32,7 @@ buildLibrary () {
   "$ROOT_PATH/script/build-openssl.sh"
   "$ROOT_PATH/script/build-libssh2.sh"
 
-  rm -rf "$TEMPPATH"
+  #rm -rf "$TEMPPATH"
 }
 
 
@@ -43,10 +43,11 @@ set -e
 #Config
 
 export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
-LIBSSH_TAG=1.9.0
-LIBSSL_TAG=OpenSSL_1_1_1h
+DEBUG=_DEBUG
+LIBSSH_TAG=1.10.0
+LIBSSL_TAG=OpenSSL_1_1_1o
 
-TAG=$LIBSSH_TAG+$LIBSSL_TAG
+TAG=$LIBSSH_TAG+$LIBSSL_TAG$DEBUG
 ZIPNAME=CSSH-$TAG.xcframework.zip
 GIT_REMOTE_URL_UNFINISHED=`git config --get remote.origin.url|sed "s=^ssh://==; s=^https://==; s=:=/=; s/git@//; s/.git$//;"`
 DOWNLOAD_URL=https://$GIT_REMOTE_URL_UNFINISHED/releases/download/$TAG/$ZIPNAME
@@ -68,8 +69,8 @@ if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
   echo "Sources already downloaded"
 else
   fetchSource "https://github.com/libssh2/libssh2/releases/download/libssh2-$LIBSSH_TAG/libssh2-$LIBSSH_TAG.tar.gz" "libssh2.tar.gz" "$LIBSSH_SOURCE"
+  patch -d "$LIBSSH_SOURCE" -p0 -i "$ROOT_PATH/script/patch-libssh2.txt"
   fetchSource "https://github.com/openssl/openssl/archive/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
-  patch -d "$OPENSSL_SOURCE" -p 0 -i "$ROOT_PATH/script/patch-ssl.txt"
 fi
 
 #Build
@@ -136,9 +137,9 @@ if [[ $1 == "commit" ]]; then
 
 git add Package.swift
 git commit -m "Build $TAG"
-git tag $TAG
+git tag -f $TAG
 git push
-git push --tags
+git push --tags --force
 gh release create "$TAG" $ZIPNAME --title "$TAG" --notes-file $ROOT_PATH/script/release-note.md
 
 fi

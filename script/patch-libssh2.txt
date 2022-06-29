@@ -1,0 +1,12 @@
+--- src/transport.c.orig	2022-06-29 11:48:45.000000000 -0400
++++ src/transport.c	2022-06-29 11:49:27.000000000 -0400
+@@ -641,7 +641,8 @@
+            we don't add this one up until the previous one has been sent. To
+            make the caller really notice his/hers flaw, we return error for
+            this case */
+-        return LIBSSH2_ERROR_BAD_USE;
++        // return LIBSSH2_ERROR_BAD_USE;
++        _libssh2_debug (session, LIBSSH2_TRACE_SOCKET, "Address is different, but will resume nonetheless");
+     }
+ 
+     *ret = 1;                   /* set to make our parent return */
