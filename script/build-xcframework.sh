@@ -21,6 +21,19 @@ fetchSource () {
   rm -f $file
 }
 
+fetchGit () {
+  local giturl=$1
+  local hash=$2
+  local path=$3
+  local file=$BUILD/$filename
+
+  mkdir -p "$path"
+  echo "Downloading $giturl"
+  git clone $giturl $path
+  (cd $path; git checkout $hash)
+  (cd $path; autoreconf -fi)
+}
+
 buildLibrary () {
   export BUILT_PRODUCTS_DIR=$1
   export SDK_PLATFORM=$2
@@ -48,7 +61,10 @@ LIBSSH_TAG=1.10.0
 LIBSSL_TAG=OpenSSL_1_1_1o
 MIGUEL_VERSION=.4
 
-TAG=$LIBSSH_TAG+$LIBSSL_TAG$DEBUG$MIGUEL_VERSION
+# Prefix label
+PREREL=Preview
+LIBSSH_HASH=ef292424bb5d136f888a2d2e92460de12c143ab4
+TAG=$PREREL$LIBSSH_TAG+$LIBSSL_TAG$DEBUG$MIGUEL_VERSION
 ZIPNAME=CSSH-$TAG.xcframework.zip
 GIT_REMOTE_URL_UNFINISHED=`git config --get remote.origin.url|sed "s=^ssh://==; s=^https://==; s=:=/=; s/git@//; s/.git$//;"`
 DOWNLOAD_URL=https://$GIT_REMOTE_URL_UNFINISHED/releases/download/$TAG/$ZIPNAME
@@ -69,9 +85,13 @@ export LIBSSH_SOURCE="$BUILD/libssh2/src/"
 if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
   echo "Sources already downloaded"
 else
-  fetchSource "https://github.com/libssh2/libssh2/releases/download/libssh2-$LIBSSH_TAG/libssh2-$LIBSSH_TAG.tar.gz" "libssh2.tar.gz" "$LIBSSH_SOURCE"
+  if test x$LIBSSH_HASH = x; then
+      fetchSource "https://github.com/libssh2/libssh2/releases/download/libssh2-$LIBSSH_TAG/libssh2-$LIBSSH_TAG.tar.gz" "libssh2.tar.gz" "$LIBSSH_SOURCE"
+      patch -d "$LIBSSH_SOURCE" -p1 -i "$ROOT_PATH/script/libssh2-userauth-banner.patch"
+  else
+      fetchGit https://github.com/libssh2/libssh2 $LIBSSH_HASH $LIBSSH_SOURCE
+  fi
   patch -d "$LIBSSH_SOURCE" -p1 -i "$ROOT_PATH/script/patch-libssh2.txt"
-  patch -d "$LIBSSH_SOURCE" -p1 -i "$ROOT_PATH/script/libssh2-userauth-banner.patch"
   fetchSource "https://github.com/openssl/openssl/archive/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
 fi
 
