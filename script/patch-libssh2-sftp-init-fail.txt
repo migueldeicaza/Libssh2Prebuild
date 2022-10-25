@@ -1,0 +1,14 @@
+diff --git a/src/sftp.c b/src/sftp.c
+--- a/src/sftp.c	2022-09-23 17:07:20.000000000 -0400
++++ b/src/sftp.c	2022-10-25 11:22:51.000000000 -0400
+@@ -893,6 +893,10 @@
+                 session->sftpInit_state = libssh2_NB_state_sent3;
+ 
+             /* if less than 9, we remain in this state to send more later on */
++            
++            if (libssh2_channel_eof (session->sftpInit_channel)) {
++                _libssh2_error (session, LIBSSH2_ERROR_SOCKET_SEND, "Channel closed");
++            }
+         }
+     }
+ 
