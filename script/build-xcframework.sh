@@ -30,7 +30,7 @@ buildLibrary () {
   export MIN_VERSION=$6
 
   "$ROOT_PATH/script/build-openssl.sh"
-  "$ROOT_PATH/script/build-libssh2.sh"
+  sh -x "$ROOT_PATH/script/build-libssh2.sh"
 
   #rm -rf "$TEMPPATH"
 }
@@ -46,7 +46,7 @@ export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
 DEBUG=_DEBUG
 LIBSSH_TAG=1.10.0
 LIBSSL_TAG=OpenSSL_1_1_1o
-MIGUEL_VERSION=.6
+MIGUEL_VERSION=.7
 
 TAG=$LIBSSH_TAG+$LIBSSL_TAG$DEBUG$MIGUEL_VERSION
 ZIPNAME=CSSH-$TAG.xcframework.zip
@@ -69,10 +69,10 @@ export LIBSSH_SOURCE="$BUILD/libssh2/src/"
 if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
   echo "Sources already downloaded"
 else
-  fetchSource "https://github.com/libssh2/libssh2/releases/download/libssh2-$LIBSSH_TAG/libssh2-$LIBSSH_TAG.tar.gz" "libssh2.tar.gz" "$LIBSSH_SOURCE"
-  patch -d "$LIBSSH_SOURCE" -p1 -i "$ROOT_PATH/script/patch-libssh2.txt"
-  patch -d "$LIBSSH_SOURCE" -p1 -i "$ROOT_PATH/script/libssh2-userauth-banner.patch"
-  patch -d "$LIBSSH_SOURCE" -p1 -i "$ROOT_PATH/script/patch-libssh2-sftp-init-fail.txt"
+  mkdir -p $BUILD/libssh2
+  cd $BUILD/libssh2 || exit 1
+  git clone -b xibbon git@github.com:xibbon/libssh2.git src
+  (cd src; autoreconf -fi; rm -rf .git)
   fetchSource "https://github.com/openssl/openssl/archive/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
 fi
 
