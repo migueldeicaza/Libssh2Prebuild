@@ -43,7 +43,7 @@ set -e
 #Config
 
 export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
-DEBUG=_TRACK_2023_04_25
+DEBUG=_TRACK_2023_04_25_2
 LIBSSH_TAG=1.10.0
 LIBSSL_TAG=OpenSSL_1_1_1o
 MIGUEL_VERSION=.7
