@@ -43,7 +43,7 @@ set -e
 #Config
 
 export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
-DEBUG=_TRACK_2023_04_25_2
+DEBUG=_TRACK_2023_04_27_1
 LIBSSH_TAG=1.10.0
 LIBSSL_TAG=OpenSSL_1_1_1o
 MIGUEL_VERSION=.7
@@ -69,11 +69,13 @@ export LIBSSH_SOURCE="$BUILD/libssh2/src/"
 if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
   echo "Sources already downloaded"
 else
-  mkdir -p $BUILD/libssh2
+    mkdir -p $BUILD/libssh2
+    current=`pwd`
   cd $BUILD/libssh2 || exit 1
   git clone -b master-upstream git@github.com:migueldeicaza/libssh2.git src
   (cd src; autoreconf -fi; rm -rf .git)
   fetchSource "https://github.com/openssl/openssl/archive/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
+  cd $current
 fi
 
 #Build
