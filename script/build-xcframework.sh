@@ -66,6 +66,8 @@ export LIBSSH_SOURCE="$BUILD/libssh2/src/"
 
 #Download
 
+commit=908241a6c8996cd8793ab14681b11542589b3591
+
 if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
   echo "Sources already downloaded"
 else
@@ -73,7 +75,7 @@ else
     current=`pwd`
   cd $BUILD/libssh2 || exit 1
   git clone -b xibbon-track-preview git@github.com:xibbon/libssh2.git src
-  (cd src; autoreconf -fi; rm -rf .git)
+  (cd src; git reset --hard $commit; autoreconf -fi; rm -rf .git)
   fetchSource "https://github.com/openssl/openssl/archive/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
   cd $current
 fi
