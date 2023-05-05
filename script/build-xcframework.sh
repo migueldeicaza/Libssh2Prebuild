@@ -72,7 +72,7 @@ else
     mkdir -p $BUILD/libssh2
     current=`pwd`
   cd $BUILD/libssh2 || exit 1
-  git clone -b xibbon-track-preview git@github.com:migueldeicaza/libssh2.git src
+  git clone -b xibbon-track-preview git@github.com:xibbon/libssh2.git src
   (cd src; autoreconf -fi; rm -rf .git)
   fetchSource "https://github.com/openssl/openssl/archive/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
   cd $current
