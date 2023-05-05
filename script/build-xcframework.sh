@@ -66,7 +66,7 @@ export LIBSSH_SOURCE="$BUILD/libssh2/src/"
 
 #Download
 
-commit=908241a6c8996cd8793ab14681b11542589b3591
+commit=2bf12a0f351c7237a28ae8ae44cdb4a5aa2a9cbe
 
 if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
   echo "Sources already downloaded"
