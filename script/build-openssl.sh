@@ -21,7 +21,9 @@ for ARCH in $ARCHS
 do
     if [[ "$SDK_PLATFORM" == "macosx" ]]; then
       CONF="no-shared"
+      X_DEFS=""
     else
+      X_DEFS="-DHAVE_FORK=0"
       CONF="no-asm no-hw no-shared no-async"
     fi
     
@@ -63,7 +65,7 @@ do
     export SDKROOT="$CROSS_TOP/SDKs/$CROSS_SDK"
     export CC="$CLANG -arch $ARCH"
 
-    CONF="$CONF -m$SDK_PLATFORM-version-min=$MIN_VERSION"
+    CONF="$CONF $X_DEFS -m$SDK_PLATFORM-version-min=$MIN_VERSION"
 
     ./Configure $HOST $CONF >> "$LOG" 2>&1
 
