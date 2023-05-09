@@ -43,10 +43,10 @@ set -e
 #Config
 
 export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
-DEBUG=_TRACK_2023_05_05_1
+DEBUG=_TRACK_2023_05_05_2
 LIBSSH_TAG=1.10.0
-LIBSSL_TAG=OpenSSL_1_1_1o
-MIGUEL_VERSION=.2
+LIBSSL_TAG=openssl-3.1.0
+MIGUEL_VERSION=.3
 
 TAG=$LIBSSH_TAG+$LIBSSL_TAG$DEBUG$MIGUEL_VERSION
 ZIPNAME=CSSH-$TAG.xcframework.zip
@@ -76,7 +76,7 @@ else
   cd $BUILD/libssh2 || exit 1
   git clone -b xibbon-track-preview git@github.com:xibbon/libssh2.git src
   (cd src; git reset --hard $commit; autoreconf -fi; rm -rf .git)
-  fetchSource "https://github.com/openssl/openssl/archive/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
+  fetchSource "https://github.com/openssl/openssl/releases/download/$LIBSSL_TAG/${LIBSSL_TAG}.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
   cd $current
 fi
 
