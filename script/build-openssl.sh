@@ -83,5 +83,7 @@ buildFatLibrary "$LIPO_LIBSSL" "$BUILT_PRODUCTS_DIR/lib/libssl.a"
 buildFatLibrary "$LIPO_LIBCRYPTO" "$BUILT_PRODUCTS_DIR/lib/libcrypto.a"
 
 copyHeaders "$OPENSSLDIR/include/" "$BUILT_PRODUCTS_DIR/include"
+rm -rf "$BUILT_PRODUCTS_DIR/include/crypto"
+rm -rf "$BUILT_PRODUCTS_DIR/include/internal"
 
 echo "Openssl - $PLATFORM done."
