@@ -8,7 +8,6 @@ module CSSH {
 
 module COpenSSL {
     header "openssl/aes.h"
-    header "openssl/asn1_mac.h"
     header "openssl/asn1err.h"
     header "openssl/async.h"
     header "openssl/asyncerr.h"
