@@ -29,7 +29,7 @@ buildLibrary () {
   export ARCHS=$5
   export MIN_VERSION=$6
 
-  "$ROOT_PATH/script/build-openssl.sh"
+  sh -x "$ROOT_PATH/script/build-openssl.sh"
   sh -x "$ROOT_PATH/script/build-libssh2.sh"
 
   #rm -rf "$TEMPPATH"
@@ -46,7 +46,7 @@ export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
 DEBUG=_TRACK_2023_05_05_2
 LIBSSH_TAG=1.10.0
 LIBSSL_TAG=openssl-3.1.0
-MIGUEL_VERSION=.3
+MIGUEL_VERSION=.4
 
 TAG=$LIBSSH_TAG+$LIBSSL_TAG$DEBUG$MIGUEL_VERSION
 ZIPNAME=CSSH-$TAG.xcframework.zip

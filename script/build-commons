@@ -17,7 +17,6 @@ copyHeaders () {
   local input=$1
   local output=$2
 
-  rm -rf "$output"
   mkdir -p "$output"
   cp -RL "$input" "$output"
 }
