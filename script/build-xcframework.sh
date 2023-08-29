@@ -43,10 +43,10 @@ set -e
 #Config
 
 export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
-DEBUG=_TRACK_2023_05_05_2
+DEBUG=_VISIONOS_TRACK_2023_05_05_2
 LIBSSH_TAG=1.10.0
 LIBSSL_TAG=openssl-3.1.0
-MIGUEL_VERSION=.5
+MIGUEL_VERSION=.6
 
 TAG=$LIBSSH_TAG+$LIBSSL_TAG$DEBUG$MIGUEL_VERSION
 ZIPNAME=CSSH-$TAG.xcframework.zip
@@ -99,7 +99,7 @@ buildLibrary "$BUILD/appletvos" "appletvos" "AppleTVOS" "" "arm64" "9.0"
 buildLibrary "$BUILD/watchsimulator" "watchsimulator" "WatchSimulator" "" "x86_64 arm64" "2.0"
 buildLibrary "$BUILD/watchos" "watchos" "WatchOS" "" "armv7k arm64_32" "2.0"
 buildLibrary "$BUILD/visionos" "visionos" "XRSimulator" "" "x86_64 arm64" "1.0"
-buildLibrary "$BUILD/visionos" "visionos" "XROS" "" "arm64" "1.0"
+buildLibrary "$BUILD/visionossimulator" "visionos" "XROS" "" "arm64" "1.0"
 
 xcodebuild -create-xcframework \
  -library $BUILD/macosx/lib/libssh2.a \
@@ -118,6 +118,10 @@ xcodebuild -create-xcframework \
  -headers $BUILD/watchsimulator/include \
  -library $BUILD/watchos/lib/libssh2.a \
  -headers $BUILD/watchos/include \
+ -library $BUILD/visionos/lib/libssh2.a \
+ -headers $BUILD/visionos/include \
+ -library $BUILD/visionossimulator/lib/libssh2.a \
+ -headers $BUILD/visionossimulator/include \
  -output CSSH.xcframework
 
 zip --recurse-paths -X --quiet $ZIPNAME CSSH.xcframework
