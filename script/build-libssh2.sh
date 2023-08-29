@@ -43,8 +43,13 @@ do
     export SDKROOT="$DEVROOT/SDKs/$PLATFORM.sdk"
     export CC="$CLANG"
     export CPP="$CLANG -E"
-    export CFLAGS="-arch $ARCH -pipe -no-cpp-precomp -isysroot $SDKROOT -m$SDK_PLATFORM-version-min=$MIN_VERSION"
-    export CPPFLAGS="-arch $ARCH -pipe -no-cpp-precomp -isysroot $SDKROOT -m$SDK_PLATFORM-version-min=$MIN_VERSION"
+    if test $SDK_PLATFORM = visionos; then
+	SDK_VERSION_FLAGS=""
+    else
+	SDK_VERSION_FLAGS="-m$SDK_PLATFORM-version-min=$MIN_VERSION"
+    fi
+    export CFLAGS="-arch $ARCH -pipe -no-cpp-precomp -isysroot $SDKROOT $SDK_VERSION_FLAGS"
+    export CPPFLAGS="-arch $ARCH -pipe -no-cpp-precomp -isysroot $SDKROOT $SDK_VERSION_FLAGS"
     if [[ "$EFFECTIVE_PLATFORM_NAME" == "-maccatalyst" ]]; then
         EXTRAFLAGS="-target $ARCH-apple-ios13.1-macabi -Wno-overriding-t-option"
         CFLAGS="${CFLAGS} ${EXTRAFLAGS}"

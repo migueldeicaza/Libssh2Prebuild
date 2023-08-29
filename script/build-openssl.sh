@@ -65,14 +65,19 @@ do
     export SDKROOT="$CROSS_TOP/SDKs/$CROSS_SDK"
     export CC="$CLANG -arch $ARCH"
 
-    CONF="$CONF $X_DEFS -m$SDK_PLATFORM-version-min=$MIN_VERSION"
+    if test $SDK_PLATFORM = visionos; then
+	SDK_VERSION_FLAGS=""
+    else
+	SDK_VERSION_FLAGS="-m$SDK_PLATFORM-version-min=$MIN_VERSION"
+    fi
+    CONF="$CONF $X_DEFS $SDK_VERSION_FLAGS"
 
     ./Configure $HOST $CONF >> "$LOG" 2>&1
 
     if [[ "$ARCH" == "x86_64" ]]; then
       sed -ie "s!^CFLAG=!CFLAG=-isysroot $SDKROOT !" "Makefile"
     fi
-
+    echo LOG=$LOG
     make depend >> "$LOG" 2>&1
     make -j "$BUILD_THREADS" build_libs >> "$LOG" 2>&1
 

@@ -98,6 +98,8 @@ buildLibrary "$BUILD/appletvsimulator" "appletvsimulator" "AppleTVSimulator" "" 
 buildLibrary "$BUILD/appletvos" "appletvos" "AppleTVOS" "" "arm64" "9.0"
 buildLibrary "$BUILD/watchsimulator" "watchsimulator" "WatchSimulator" "" "x86_64 arm64" "2.0"
 buildLibrary "$BUILD/watchos" "watchos" "WatchOS" "" "armv7k arm64_32" "2.0"
+buildLibrary "$BUILD/visionos" "visionos" "XRSimulator" "" "x86_64 arm64" "1.0"
+buildLibrary "$BUILD/visionos" "visionos" "XROS" "" "arm64" "1.0"
 
 xcodebuild -create-xcframework \
  -library $BUILD/macosx/lib/libssh2.a \
