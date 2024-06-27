@@ -43,10 +43,12 @@ set -e
 #Config
 
 export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
-DEBUG=EXPLICIT_WINDOW
+# Branch: xibbon-track-preview which is based on libssh2 e36b21df910a412bb27789dd0295fcd439df87b5 plus
+# our patches, including the new "explicit-window" patch
+DEBUG=_VISIONOS_TRACK_2023_05_23_AND_EXPLICIT_WINDOW_
 LIBSSH_TAG=1.10.0
 LIBSSL_TAG=openssl-3.1.0
-MIGUEL_VERSION=.7
+MIGUEL_VERSION=.8
 
 TAG=$LIBSSH_TAG+$LIBSSL_TAG$DEBUG$MIGUEL_VERSION
 ZIPNAME=CSSH-$TAG.xcframework.zip
@@ -66,7 +68,7 @@ export LIBSSH_SOURCE="$BUILD/libssh2/src/"
 
 #Download
 
-commit=98a216bb25eea9e2fada79f427afc1433e95448d
+commit=293e451dcd343251650cbf6aa5ffcf8aebf03caf
 
 if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
   echo "Sources already downloaded"
