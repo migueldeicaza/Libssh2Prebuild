@@ -43,10 +43,10 @@ set -e
 #Config
 
 export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
-DEBUG=_VISIONOS_TRACK_2023_05_05_2
+DEBUG=_VISIONOS_TRACK_2024_06_27_1
 LIBSSH_TAG=1.10.0
 LIBSSL_TAG=openssl-3.1.0
-MIGUEL_VERSION=.6
+MIGUEL_VERSION=.7
 
 TAG=$LIBSSH_TAG+$LIBSSL_TAG$DEBUG$MIGUEL_VERSION
 ZIPNAME=CSSH-$TAG.xcframework.zip
@@ -66,7 +66,7 @@ export LIBSSH_SOURCE="$BUILD/libssh2/src/"
 
 #Download
 
-commit=2bf12a0f351c7237a28ae8ae44cdb4a5aa2a9cbe
+commit=d0ca1164c94891f0c9acc94fffbb258fc0f4e5ca
 
 if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
   echo "Sources already downloaded"
