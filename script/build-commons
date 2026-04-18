@@ -21,3 +21,11 @@ copyHeaders () {
   mkdir -p "$output"
   cp -RL "$input" "$output"
 }
+
+copySourceTree () {
+  local input=$1
+  local output=$2
+
+  mkdir -p "$output"
+  cp -R "$input/." "$output"
+}

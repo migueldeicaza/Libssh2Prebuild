@@ -27,11 +27,20 @@ do
 
     mkdir -p "$PLATFORM_SRC"
     mkdir -p "$PLATFORM_OUT"
-    cp -R "$LIBSSH_SOURCE" "$PLATFORM_SRC"
+    copySourceTree "$LIBSSH_SOURCE" "$PLATFORM_SRC"
     cd "$PLATFORM_SRC"
 
     touch $LOG
     echo "LOG: $LOG"
+
+    if [[ ! -x ./configure ]]; then
+      LIBTOOLIZE_BIN=$(command -v glibtoolize || command -v libtoolize || true)
+      if [[ -z "$LIBTOOLIZE_BIN" ]]; then
+        echo "Unable to find glibtoolize/libtoolize for libssh2 autoreconf" >> "$LOG"
+        exit 1
+      fi
+      LIBTOOLIZE="$LIBTOOLIZE_BIN" autoreconf -fi >> "$LOG" 2>&1
+    fi
     
     if [[ "$ARCH" == arm64* ]]; then
       HOST="aarch64-apple-darwin"
@@ -43,6 +52,7 @@ do
     export SDKROOT="$DEVROOT/SDKs/$PLATFORM.sdk"
     export CC="$CLANG"
     export CPP="$CLANG -E"
+    BUILD_TRIPLE=$(/bin/bash ./config.guess)
     export CFLAGS="-arch $ARCH -pipe -no-cpp-precomp -isysroot $SDKROOT -m$SDK_PLATFORM-version-min=$MIN_VERSION"
     export CPPFLAGS="-arch $ARCH -pipe -no-cpp-precomp -isysroot $SDKROOT -m$SDK_PLATFORM-version-min=$MIN_VERSION"
     if [[ "$EFFECTIVE_PLATFORM_NAME" == "-maccatalyst" ]]; then
@@ -51,15 +61,9 @@ do
         CPPFLAGS="${CPPFLAGS} ${EXTRAFLAGS}"
     fi
 
-    if [[ $(./configure --help | grep -c -- --with-openssl) -eq 0 ]]; then
-      CRYPTO_BACKEND_OPTION="--with-crypto=openssl"
-    else
-      CRYPTO_BACKEND_OPTION="--with-openssl"
-    fi
+    /bin/bash ./configure --build="$BUILD_TRIPLE" --host=$HOST --prefix="$PLATFORM_OUT" --disable-debug --disable-dependency-tracking --disable-silent-rules --disable-docs --disable-examples-build --without-libz --with-crypto=openssl --with-libssl-prefix="$OPENSSLDIR" --disable-shared --enable-static  >> "$LOG" 2>&1
 
-    ./configure --host=$HOST --prefix="$PLATFORM_OUT" --disable-debug --disable-dependency-tracking --disable-silent-rules --disable-examples-build --without-libz $CRYPTO_BACKEND_OPTION --with-libssl-prefix="$OPENSSLDIR" --disable-shared --enable-static  >> "$LOG" 2>&1
-
-    make >> "$LOG" 2>&1
+    make -j "$BUILD_THREADS" >> "$LOG" 2>&1
     make -j "$BUILD_THREADS" install >> "$LOG" 2>&1
 
     echo "Libssh2 - $PLATFORM $ARCH done."

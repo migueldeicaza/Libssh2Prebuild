@@ -6,7 +6,7 @@
 | Platform          |  Architectures     |
 |-------------------|--------------------|
 | macOS             | x86_64 arm64       |
-| iOS               | arm64 armv7 armv7s |
+| iOS               | arm64              |
 | iOS Simulator     | x86_64 arm64       |
 | watchOS           | armv7k arm64_32    |
 | watchOS Simulator | x86_64 arm64       |
@@ -14,16 +14,21 @@
 | tvOS Simulator    | x86_64 arm64       |
 | mac Catalyst      | x86_64 arm64       |
 
+### Current source pins
+
+- libssh2: `xibbon/libssh2` branch `xibbon-2026-05-baseline`
+- OpenSSL: `openssl-3.5.6`
+
 ### Usage
 
-Add line to you package.swift dependencies:
+Add line to your `Package.swift` dependencies:
 
 ```
 .package(name: "CSSH", url: "https://github.com/DimaRU/Libssh2Prebuild.git", from: "1.9.0")
 
 ```
 
-Right now used with the Shout library: [https://github.com/DimaRU/Shout](https://github.com/DimaRU/Shout)
+The build script writes a binary-target `Package.swift` with the release URL and checksum for the generated archive.
 
 ### Xcode 12 bug note!
 
@@ -38,7 +43,7 @@ rm -f ${CODESIGNING_FOLDER_PATH}/Contents/Frameworks/*.a
 
 ### Build your own repo from source
 
-Required Xcode 12.2, and [github cli](https://github.com/cli/cli). Intended to use with github.
+Required current Xcode, autotools (`autoconf`, `automake`, `libtool`/`glibtoolize`), and [github cli](https://github.com/cli/cli). Intended to use with GitHub.
 
 1. Install gh: `brew install gh`
 2. Authorize gh: `gh auth`

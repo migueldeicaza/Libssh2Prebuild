@@ -19,10 +19,12 @@ mkdir -p $BUILT_PRODUCTS_DIR
 
 for ARCH in $ARCHS
 do
+    CONF="no-apps no-tests"
+    USE_XCRUN_TARGET=0
     if [[ "$SDK_PLATFORM" == "macosx" ]]; then
-      CONF="no-shared"
+      CONF="$CONF no-shared"
     else
-      CONF="no-asm no-hw no-shared no-async"
+      CONF="$CONF no-asm no-hw no-shared no-async"
     fi
     
     if [[ "$EFFECTIVE_PLATFORM_NAME" == "-maccatalyst" ]]; then
@@ -35,7 +37,7 @@ do
     LIPO_LIBCRYPTO="$LIPO_LIBCRYPTO $OPENSSLDIR/libcrypto.a"
 
     mkdir -p "$OPENSSLDIR"
-    cp -R "$OPENSSL_SOURCE" "$OPENSSLDIR"
+    copySourceTree "$OPENSSL_SOURCE" "$OPENSSLDIR"
     cd "$OPENSSLDIR"
 
     touch $LOG
@@ -50,6 +52,22 @@ do
       else
         HOST="darwin-$ARCH-cc"
       fi
+    elif [[ "$SDK_PLATFORM" == "iphoneos" ]]; then
+      USE_XCRUN_TARGET=1
+      if [[ "$ARCH" == arm64* ]]; then
+        HOST="ios64-xcrun"
+      else
+        HOST="ios-xcrun"
+      fi
+    elif [[ "$SDK_PLATFORM" == "iphonesimulator" ]]; then
+      USE_XCRUN_TARGET=1
+      if [[ "$ARCH" == "x86_64" ]]; then
+        HOST="iossimulator-x86_64-xcrun"
+      elif [[ "$ARCH" == "arm64" ]]; then
+        HOST="iossimulator-arm64-xcrun"
+      else
+        HOST="iossimulator-xcrun"
+      fi
     else
       HOST="iphoneos-cross"
     fi
@@ -61,11 +79,15 @@ do
     export CROSS_TOP="$DEVELOPER/Platforms/$PLATFORM.platform/Developer"
     export CROSS_SDK="$PLATFORM.sdk"
     export SDKROOT="$CROSS_TOP/SDKs/$CROSS_SDK"
-    export CC="$CLANG -arch $ARCH"
+    if [[ "$USE_XCRUN_TARGET" == "1" ]]; then
+      unset CC
+    else
+      export CC="$CLANG -arch $ARCH"
+    fi
 
     CONF="$CONF -m$SDK_PLATFORM-version-min=$MIN_VERSION"
 
-    ./Configure $HOST $CONF >> "$LOG" 2>&1
+    perl ./Configure $HOST $CONF >> "$LOG" 2>&1
 
     if [[ "$ARCH" == "x86_64" ]]; then
       sed -ie "s!^CFLAG=!CFLAG=-isysroot $SDKROOT !" "Makefile"

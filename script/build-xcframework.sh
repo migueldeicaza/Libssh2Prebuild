@@ -21,6 +21,38 @@ fetchSource () {
   rm -f $file
 }
 
+fetchGitSource () {
+  local url=$1
+  local ref=$2
+  local path=$3
+
+  rm -rf "$path"
+  mkdir -p "$(dirname "$path")"
+
+  echo "Cloning $url ($ref)"
+  git clone --depth 1 --branch "$ref" "$url" "$path"
+}
+
+prepareLibssh2Source () {
+  local path=$1
+  local libtoolize_bin
+
+  if [[ -x "$path/configure" ]]; then
+    return
+  fi
+
+  libtoolize_bin=$(command -v glibtoolize || command -v libtoolize || true)
+  if [[ -z "$libtoolize_bin" ]]; then
+    echo "error: missing glibtoolize/libtoolize required for libssh2 autoreconf" >&2
+    exit 1
+  fi
+
+  (
+    cd "$path"
+    LIBTOOLIZE="$libtoolize_bin" autoreconf -fi
+  )
+}
+
 buildLibrary () {
   export BUILT_PRODUCTS_DIR=$1
   export SDK_PLATFORM=$2
@@ -42,14 +74,12 @@ set -e
 
 #Config
 
-export BUILD_THREADS=$(sysctl hw.ncpu | awk '{print $2}')
-LIBSSH_TAG=1.9.0
-LIBSSL_TAG=OpenSSL_1_1_1h
+export BUILD_THREADS=$(sysctl -n hw.ncpu)
+LIBSSH_REMOTE_URL=https://github.com/xibbon/libssh2.git
+LIBSSH_BRANCH=xibbon-2026-05-baseline
+LIBSSL_TAG=openssl-3.5.6
 
-TAG=$LIBSSH_TAG+$LIBSSL_TAG
-ZIPNAME=CSSH-$TAG.xcframework.zip
 GIT_REMOTE_URL_UNFINISHED=`git config --get remote.origin.url|sed "s=^ssh://==; s=^https://==; s=:=/=; s/git@//; s/.git$//;"`
-DOWNLOAD_URL=https://$GIT_REMOTE_URL_UNFINISHED/releases/download/$TAG/$ZIPNAME
 
 export ROOT_PATH=$(cd "$(dirname "$0")/.."; pwd -P)
 pushd $ROOT_PATH > /dev/null
@@ -59,18 +89,29 @@ export TEMPPATH=$ROOT_PATH/temp
 
 export LIBSSLDIR="$TEMPPATH/openssl"
 export LIBSSHDIR="$TEMPPATH/libssh2"
-export OPENSSL_SOURCE="$BUILD/openssl/src/"
-export LIBSSH_SOURCE="$BUILD/libssh2/src/"
+export OPENSSL_SOURCE="$BUILD/openssl/src"
+export LIBSSH_SOURCE="$BUILD/libssh2/src"
+
+rm -rf "$BUILD" "$TEMPPATH" "$ROOT_PATH/CSSH.xcframework"
+mkdir -p "$BUILD" "$TEMPPATH"
 
 #Download
 
-if [[ -d "$OPENSSL_SOURCE" ]] && [[ -d "$LIBSSH_SOURCE" ]]; then
-  echo "Sources already downloaded"
-else
-  fetchSource "https://github.com/libssh2/libssh2/releases/download/libssh2-$LIBSSH_TAG/libssh2-$LIBSSH_TAG.tar.gz" "libssh2.tar.gz" "$LIBSSH_SOURCE"
-  fetchSource "https://github.com/openssl/openssl/archive/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
-  patch -d "$OPENSSL_SOURCE" -p 0 -i "$ROOT_PATH/script/patch-ssl.txt"
-fi
+fetchGitSource "$LIBSSH_REMOTE_URL" "$LIBSSH_BRANCH" "$LIBSSH_SOURCE"
+prepareLibssh2Source "$LIBSSH_SOURCE"
+fetchSource "https://github.com/openssl/openssl/archive/refs/tags/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
+
+LIBSSH_VERSION=$(sed -n 's/^#define LIBSSH2_VERSION[[:space:]]*"\(.*\)"/\1/p' "$LIBSSH_SOURCE/include/libssh2.h")
+LIBSSH_VERSION_TAG="${LIBSSH_VERSION/_DEV/-dev}"
+LIBSSH_COMMIT=$(git -C "$LIBSSH_SOURCE" rev-parse --short=12 HEAD)
+OPENSSL_VERSION=${LIBSSL_TAG#openssl-}
+TAG="${LIBSSH_VERSION_TAG}.xibbon-2026-05-baseline+g${LIBSSH_COMMIT}.openssl-${OPENSSL_VERSION}"
+ZIPNAME=CSSH-$TAG.xcframework.zip
+DOWNLOAD_TAG="${TAG//+/%2B}"
+DOWNLOAD_ZIPNAME="${ZIPNAME//+/%2B}"
+DOWNLOAD_URL="https://$GIT_REMOTE_URL_UNFINISHED/releases/download/$DOWNLOAD_TAG/$DOWNLOAD_ZIPNAME"
+
+rm -f "$ZIPNAME"
 
 #Build
 
@@ -83,7 +124,7 @@ fi
 #export MIN_VERSION=$6
 
 buildLibrary "$BUILD/maccatalyst" "macosx" "MacOSX" "-maccatalyst" "x86_64 arm64" "10.15"
-buildLibrary "$BUILD/iphoneos" "iphoneos" "iPhoneOS" "" "armv7 armv7s arm64" "9.0"
+buildLibrary "$BUILD/iphoneos" "iphoneos" "iPhoneOS" "" "arm64" "9.0"
 buildLibrary "$BUILD/iphonesimulator" "iphonesimulator" "iPhoneSimulator" "" "x86_64 arm64" "9.0"
 buildLibrary "$BUILD/macosx" "macosx" "MacOSX" "" "x86_64 arm64" "10.10"
 buildLibrary "$BUILD/appletvsimulator" "appletvsimulator" "AppleTVSimulator" "" "x86_64 arm64" "9.0"
