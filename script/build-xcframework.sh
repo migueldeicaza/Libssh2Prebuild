@@ -33,6 +33,19 @@ fetchGitSource () {
   git clone --depth 1 --branch "$ref" "$url" "$path"
 }
 
+fetchGitRevision () {
+  local url=$1
+  local commit=$2
+  local path=$3
+
+  rm -rf "$path"
+  mkdir -p "$(dirname "$path")"
+
+  echo "Cloning $url @ $commit"
+  git clone "$url" "$path"
+  git -C "$path" checkout --detach "$commit"
+}
+
 prepareLibssh2Source () {
   local path=$1
   local libtoolize_bin
@@ -75,8 +88,8 @@ set -e
 #Config
 
 export BUILD_THREADS=$(sysctl -n hw.ncpu)
-LIBSSH_REMOTE_URL=https://github.com/xibbon/libssh2.git
-LIBSSH_BRANCH=xibbon-2026-05-baseline
+LIBSSH_REMOTE_URL=git@github.com:xibbon/libssh2.git
+LIBSSH_COMMIT=da3d1bd44cd90e41d4b26bfc8ccf1eb8d16a9332
 LIBSSL_TAG=openssl-3.5.6
 
 GIT_REMOTE_URL_UNFINISHED=`git config --get remote.origin.url|sed "s=^ssh://==; s=^https://==; s=:=/=; s/git@//; s/.git$//;"`
@@ -97,7 +110,7 @@ mkdir -p "$BUILD" "$TEMPPATH"
 
 #Download
 
-fetchGitSource "$LIBSSH_REMOTE_URL" "$LIBSSH_BRANCH" "$LIBSSH_SOURCE"
+fetchGitRevision "$LIBSSH_REMOTE_URL" "$LIBSSH_COMMIT" "$LIBSSH_SOURCE"
 prepareLibssh2Source "$LIBSSH_SOURCE"
 fetchSource "https://github.com/openssl/openssl/archive/refs/tags/$LIBSSL_TAG.tar.gz" "openssl.tar.gz" "$OPENSSL_SOURCE"
 
@@ -105,7 +118,7 @@ LIBSSH_VERSION=$(sed -n 's/^#define LIBSSH2_VERSION[[:space:]]*"\(.*\)"/\1/p' "$
 LIBSSH_VERSION_TAG="${LIBSSH_VERSION/_DEV/-dev}"
 LIBSSH_COMMIT=$(git -C "$LIBSSH_SOURCE" rev-parse --short=12 HEAD)
 OPENSSL_VERSION=${LIBSSL_TAG#openssl-}
-TAG="${LIBSSH_VERSION_TAG}.xibbon-2026-05-baseline+g${LIBSSH_COMMIT}.openssl-${OPENSSL_VERSION}"
+TAG="${LIBSSH_VERSION_TAG}.xibbon+g${LIBSSH_COMMIT}.openssl-${OPENSSL_VERSION}"
 ZIPNAME=CSSH-$TAG.xcframework.zip
 DOWNLOAD_TAG="${TAG//+/%2B}"
 DOWNLOAD_ZIPNAME="${ZIPNAME//+/%2B}"
