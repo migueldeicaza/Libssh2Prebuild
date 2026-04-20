@@ -89,7 +89,7 @@ set -e
 
 export BUILD_THREADS=$(sysctl -n hw.ncpu)
 LIBSSH_REMOTE_URL=git@github.com:xibbon/libssh2.git
-LIBSSH_COMMIT=da3d1bd44cd90e41d4b26bfc8ccf1eb8d16a9332
+LIBSSH_COMMIT=293e451dcd343251650cbf6aa5ffcf8aebf03caf
 LIBSSL_TAG=openssl-3.5.6
 
 GIT_REMOTE_URL_UNFINISHED=`git config --get remote.origin.url|sed "s=^ssh://==; s=^https://==; s=:=/=; s/git@//; s/.git$//;"`
